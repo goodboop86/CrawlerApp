@@ -14,16 +14,15 @@ def app():
     shop = st.text_input(
         'あなたのショップのURLを教えてください。(https://example.myshop.com)', 'https://reo.thebase.in/')
 
-    shop = requests.utils.quote(shop)
-    response = requests.post(url, json.dumps({"target": shop}))
-
+    response = requests.post(url, json.dumps(
+        {"target": requests.utils.quote(shop)}))
     st.write(response.json())
 
     product = st.text_input(
         'あなたの製品のURLを教えてください。(https://example.myshop.com/items/1234567)', 'https://reo.thebase.in/items/6019347')
 
-    product = requests.utils.quote(product)
-    response = requests.post(url, json.dumps({"target": product}))
+    response = requests.post(url, json.dumps(
+        {"target": requests.utils.quote(product)}))
     st.write(response.json())
 
     st.header("あなたのお店について教えてください")

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
+
+from crawler.baseshop import BaseShop
 from fastapi import FastAPI
 from pydantic import BaseModel
-from lxml import html
+from model.baseshop import Shop, Item
+from model.request import ScrapeTarget
+from typing import Union
 import requests
 
 app = FastAPI()
-
-
-class ScrapeTarget(BaseModel):
-    target: str
 
 
 @app.get("/")
@@ -17,19 +17,13 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/post")
+@app.post("/post", response_model=Union[Item, Shop])
 async def post(request: ScrapeTarget):
-
-    if request.target is None:
-        return {"pass": "200"}
-
     url = requests.utils.unquote(request.target)
 
-    res = requests.get(url)
-    tree = html.fromstring(res.text)
-    childs: list[html.HtmlElement] = tree.xpath("//meta[@property]")
-    childs: list[list[str, str]] = list(map(lambda x: x.values(), childs))
-    print(childs)
-    tags: dict[str, str] = {v: k for v, k in childs}
+    if url is None:
+        return {"200": "入力してください。\n 例:https://reo.thebase.in/items/6019347 https://reo.thebase.in/"}
 
-    return tags
+    crawler = BaseShop(url=url)
+
+    return crawler.crawl()
