@@ -11,18 +11,18 @@ class Crawler(object, metaclass=abc.ABCMeta):
     def __call__(self):
         pass
 
-    @abc.abstractclassmethod
-    def __item(self):
+    @classmethod
+    def _item_from_itempage(self):
         pass
 
-    @abc.abstractclassmethod
-    def __shop(self):
+    @classmethod
+    def _items_from_itempagelist(self):
         pass
 
-    @abc.abstractclassmethod
-    def __crawl_list(self):
+    @classmethod
+    def _item_from_toppage(self):
         pass
 
-    @abc.abstractclassmethod
-    def __item_list(self):
+    @classmethod
+    def _itemurls_from_sitemap(self):
         pass

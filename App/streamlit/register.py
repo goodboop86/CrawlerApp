@@ -10,17 +10,27 @@ def app():
 
     st.title('ショップ登録ツール')
 
-    url = st.text_input('url', conf['fastapi']['url']+"/crawl/baseshop")
-    shop = st.text_input(
-        'あなたのショップのURLを教えてください。(https://example.myshop.com)', 'https://reo.thebase.in/')
+    url = st.text_input('url', conf['fastapi']['url']+"/crawl")
+    target = st.text_input(
+        'クロールしたいURLを教えてください。(https://example.myshop.com)', 'https://reo.thebase.in/')
 
-    response = requests.post(url, json.dumps({"target": shop}))
-    st.write(response.json())
+    crawl_domain = st.radio('crawl_domain', ['baseshop'])
+    crawl_type = st.radio(
+        'crawl_type', ["item_from_itempage", "items_from_itempagelist",
+                       "item_from_toppage", "itemurls_from_sitemap"])
 
-    product = st.text_input(
-        'あなたの製品のURLを教えてください。(https://example.myshop.com/items/1234567)', 'https://reo.thebase.in/items/6019347')
+    request = json.dumps(
+        {
+            "target": target,
+            "strategy": {
+                "crawl_domain": crawl_domain,
+                "crawl_type": crawl_type
+            }
+        })
 
-    response = requests.post(url, json.dumps({"target": product}))
+    print(request)
+
+    response = requests.post(url, request)
     st.write(response.json())
 
     st.header("あなたのお店について教えてください")

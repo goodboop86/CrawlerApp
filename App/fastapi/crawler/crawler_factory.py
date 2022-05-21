@@ -1,20 +1,18 @@
-from enum import Enum
-from typing import Union
+from typing import Callable
 
 from pydantic import HttpUrl
-from crawler.baseshop_crawler import BaseShopCrawler
-from model import crawler_model
 from datamodel.request_model import CrawlRequest
+from factorymap.crawler_factorymap import CrawlDomainMap, CrawlTypeMap
+from typing import Union
 
 
 class CrawlerFactory(object):
-    def __init__(self, request: CrawlRequest) -> None:
+    def __new__(self, request: CrawlRequest):
         target: Union[list[HttpUrl], HttpUrl] = request.target
-        crawl_domain: str = request.strategy.crawl_domain
-        crawl_type: str = request.strategy.crawl_type
+        domain: str = request.strategy.crawl_domain
+        type: str = request.strategy.crawl_type
 
-        self.__cls = globals(crawl_domain)
-        self.__func = getattr(self.__cls, crawl_type)
-        self.__cls.__init__(target=target, func=self.__func)
+        crawler: any = CrawlDomainMap[domain].value
+        func: Callable = getattr(crawler, CrawlTypeMap[type].value)
 
-        return self.__cls
+        return crawler(target=target, func=func)

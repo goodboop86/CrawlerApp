@@ -1,10 +1,10 @@
 
 from lxml import html
-from datamodel.request_model import CrawlRequest, CrawlType
 from crawler.crawler import Crawler
 import requests
 from pydantic import HttpUrl
 from typing import Callable
+from datamodel.request_model import CrawlRequest
 
 
 class BaseShopCrawler(Crawler):
@@ -15,13 +15,11 @@ class BaseShopCrawler(Crawler):
         self.__crawl_func: Callable = func
 
     def __call__(self):
-        self.__crawl_func()
+        return self.__crawl_func(target=self.__target)
 
-    def __item(self):
-        return self.__shop()
-
-    def __shop(self):
-        res = requests.get(self.__target)
+    @staticmethod
+    def _item_from_itempage(target: HttpUrl):
+        res = requests.get(target)
         tree = html.fromstring(res.text)
         childs: list[html.HtmlElement] = tree.xpath("//meta[@property]")
         childs: list[list[str, str]] = list(map(lambda x: x.values(), childs))
@@ -29,18 +27,20 @@ class BaseShopCrawler(Crawler):
 
         return tags
 
-    def __crawl_list(self):
+    @staticmethod
+    def _items_from_itempagelist(target: list[HttpUrl]):
         pass
 
-    def __item_list(self):
-        pass
-
-    def crawl_item(self):
-        res = requests.get(self.target)
+    @staticmethod
+    def _item_from_toppage(target: HttpUrl):
+        res = requests.get(target)
         tree = html.fromstring(res.text)
         childs: list[html.HtmlElement] = tree.xpath("//meta[@property]")
         childs: list[list[str, str]] = list(map(lambda x: x.values(), childs))
-
         tags: dict[str, str] = {k.replace(':', '_'): v for k, v in childs}
 
         return tags
+
+    @staticmethod
+    def _itemurls_from_sitemap(target: HttpUrl):
+        pass
