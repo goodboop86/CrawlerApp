@@ -11,27 +11,33 @@ def app():
     st.title('ショップ登録ツール')
 
     url = st.text_input('url', conf['fastapi']['url']+"/crawl")
-    target = st.text_input(
-        'クロールしたいURLを教えてください。(https://example.myshop.com)', 'https://reo.thebase.in/')
 
-    crawl_domain = st.radio('crawl_domain', ['baseshop'])
-    crawl_type = st.radio(
-        'crawl_type', ["item_from_itempage", "items_from_itempagelist",
-                       "item_from_toppage", "itemurls_from_sitemap"])
+    domains = {"BASE": "baseshop"}
+    crawl_domain = st.radio('取得するドメイン', domains.keys())
+
+    types = {"商品": "item_from_itempage", "複数商品": "items_from_itempagelist",
+             "トップページ": "item_from_toppage", "商品リスト": "itemurls_from_sitemap"}
+
+    crawl_type = st.radio('取得する内容', types.keys())
+
+    target = st.text_input(
+        f'({crawl_type}) URLを教えてください。: 例:https://example.myshop.com', 'https://reo.thebase.in/')
 
     request = json.dumps(
         {
             "target": target,
             "strategy": {
-                "crawl_domain": crawl_domain,
-                "crawl_type": crawl_type
+                "crawl_domain": domains[crawl_domain],
+                "crawl_type": types[crawl_type]
             }
         })
 
-    print(request)
+    if st.button('確認'):
 
-    response = requests.post(url, request)
-    st.write(response.json())
+        response = requests.post(url, request)
+        st.success("OK!") if target == response.json()["og_url"] else st.success(
+            "NG...")
+        st.write(response.json())
 
     st.header("あなたのお店について教えてください")
     sex = st.selectbox('お客さまはどちらが多いですか？',
