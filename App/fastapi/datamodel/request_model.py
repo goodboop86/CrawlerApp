@@ -34,3 +34,8 @@ class Strategy(BaseModel):
 class CrawlRequest(BaseModel):
     target: Union[list[HttpUrl], HttpUrl] = Field(...)
     strategy: Strategy
+
+
+class AuthRequest(BaseModel):
+    username: str
+    password: str

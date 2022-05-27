@@ -1,4 +1,6 @@
 import streamlit as st
+import json
+import requests
 
 
 def login():
@@ -9,29 +11,40 @@ def logout():
     st.session_state.is_loggedin = False
 
 
-def check_input(u, p):
+def auth(u, p, c):
     st.info(f"{st.session_state.username}, {st.session_state.username}, {locals()}")
-    if st.session_state.username == u and st.session_state.username == p:
+    url = c['fastapi']['url']+"/signin"
+    request = json.dumps({"username": u, "password": p})
+    response = requests.post(url, request)
+    if response.json()["status"] == "success":
+        st.success(f"SIGNIN SUCCESS ^_^")
         login()
     else:
-        st.error(f"ERROR ;_;")
+        message = response.json()["message"]
+        st.error(f"{message}")
 
 
-def regist(u, p, c):
-    if u and p and c:
-        st.success(f"SUCCESS ^_^ {locals()}")
-        st.session_state.username = u
-        st.session_state.password = p
+def regist(u, p, c_v, c):
+    url = c['fastapi']['url']+"/signup"
+    request = json.dumps({"username": u, "password": p})
+    response = requests.post(url, request)
+    if response.json()["status"] == "success":
+        st.success(f"SIGNUP SUCCESS! ^_^")
     else:
-        st.error(f"ERROR ;_;  {locals()}")
+        message = response.json()["message"]
+        st.error(f"{message}")
 
 
 def app():
+
+    with open("setting.json") as f:
+        conf = json.load(f)
+
     username = st.text_input("ログインアドレス")
     password = st.text_input("ログインパスワード", type='password')
 
     submitted = st.button(
-        "ログイン", on_click=check_input, args=(username, password))
+        "ログイン", on_click=auth, args=(username, password, conf))
 
     with st.expander("未登録の方"):
         st.write("こちらからご登録ください")
@@ -40,7 +53,7 @@ def app():
         checkbox_val = st.checkbox("規約に合意する")
 
         submitted = st.button("登録", on_click=regist, args=(
-            username, password, checkbox_val))
+            username, password, checkbox_val, conf))
         if submitted:
             st.text(f"{username}, {password}, {checkbox_val}")
 
