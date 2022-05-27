@@ -28,14 +28,14 @@ async def crawl(request: CrawlRequest):
 @app.post("/signup")
 async def signup(request: AuthRequest):
     auth = Auth()
-    response = auth.signup(request.username, request.password)
+    response = auth.signup(request.address, request.password)
     return response
 
 
 @app.post("/signin",)
 async def signin(request: AuthRequest):
     auth = Auth()
-    response = auth.signin(request.username, request.password)
+    response = auth.signin(request.address, request.password)
     return response
 
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, HttpUrl, validator
+from pydantic import BaseModel, Field, HttpUrl, validator, SecretStr, EmailStr
 from typing import Union
 #from model.crawler_model import CrawlDomain, CrawlType
 
@@ -37,5 +37,5 @@ class CrawlRequest(BaseModel):
 
 
 class AuthRequest(BaseModel):
-    username: str
-    password: str
+    address: EmailStr
+    password: SecretStr = Field(min_length=8, max_length=64)

@@ -1,8 +1,15 @@
 {
     "streamlit": {
-        "url": "http://localhost:8501"
+        "url": {
+            "root": "http://localhost:8501"
+        }
     },
     "fastapi": {
-        "url": "http://127.0.0.1:8000"
+        "url": {
+            "root": "http://127.0.0.1:8000",
+            "signup": "http://127.0.0.1:8000/signup",
+            "signin": "http://127.0.0.1:8000/signin",
+            "crawl": "http://127.0.0.1:8000/crawl"
+        }
     }
 }

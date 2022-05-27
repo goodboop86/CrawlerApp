@@ -10,7 +10,7 @@ def app():
 
     st.title('ショップ登録ツール')
 
-    url = st.text_input('url', conf['fastapi']['url']+"/crawl")
+    url = st.text_input('url', conf['fastapi']['url']["crawl"])
 
     domains = {"BASE": "baseshop"}
     crawl_domain = st.radio('取得するドメイン', domains.keys())
@@ -33,7 +33,6 @@ def app():
         })
 
     if st.button('確認'):
-
         response = requests.post(url, request)
         st.success("OK!") if target == response.json()["og_url"] else st.success(
             "NG...")
