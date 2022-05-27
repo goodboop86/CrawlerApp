@@ -4,11 +4,11 @@ import requests
 import hashlib
 
 
-def login():
+def signin():
     st.session_state.is_loggedin = True
 
 
-def logout():
+def signout():
     st.session_state.is_loggedin = False
 
 
@@ -19,7 +19,7 @@ def auth(_address, _password, _conf):
     if response.ok:
         st.info(f"{response.text}")
         if response.json()["status"] == "success":
-            login()
+            signin()
     else:
         st.error(f"{response.text}")
 

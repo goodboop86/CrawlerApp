@@ -24,6 +24,6 @@ with st.sidebar:
     page = pages[selection]
 
     if st.session_state.is_loggedin:
-        st.button('ログアウト', on_click=top.logout)
+        st.button('ログアウト', on_click=top.signout)
 
 page.app()
