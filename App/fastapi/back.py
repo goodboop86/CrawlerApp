@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
+
+import uvicorn
+from crawler.crawler_factory import CrawlerFactory
 from fastapi import FastAPI
-from pydantic import BaseModel
-from lxml import html
-import requests
+from datamodel.baseshop_model import Shop, Item
+from datamodel.request_model import CrawlRequest, CrawlDomain, AuthRequest
+from typing import Union
+from auth.auth import Auth
+
 
 app = FastAPI()
-
-
-class ScrapeTarget(BaseModel):
-    target: str
 
 
 @app.get("/")
@@ -17,19 +18,26 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.post("/post")
-async def post(request: ScrapeTarget):
+@app.post("/crawl", response_model=Union[Item, Shop])
+async def crawl(request: CrawlRequest):
+    crawler = CrawlerFactory(request=request)
+    result = crawler()
+    return result
 
-    if request.target is None:
-        return {"pass": "200"}
 
-    url = requests.utils.unquote(request.target)
+@app.post("/signup")
+async def signup(request: AuthRequest):
+    auth = Auth()
+    response = auth.signup(request.address, request.password)
+    return response
 
-    res = requests.get(url)
-    tree = html.fromstring(res.text)
-    childs: list[html.HtmlElement] = tree.xpath("//meta[@property]")
-    childs: list[list[str, str]] = list(map(lambda x: x.values(), childs))
-    print(childs)
-    tags: dict[str, str] = {v: k for v, k in childs}
 
-    return tags
+@app.post("/signin",)
+async def signin(request: AuthRequest):
+    auth = Auth()
+    response = auth.signin(request.address, request.password)
+    return response
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
