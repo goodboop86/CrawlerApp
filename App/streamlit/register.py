@@ -39,12 +39,49 @@ def app():
         st.write(response.json())
 
     st.header("あなたのお店について教えてください")
-    sex = st.selectbox('お客さまはどちらが多いですか？',
-                       ['男性', '女性'])
-    st.write(f'Selected: {sex}')
-    age = st.selectbox('年齢層は？',
-                       ['~10代', '20代', '30代', '40代', '50代', '60代~'])
-    st.write(f'Selected: {age}')
+
+    gender = conf["streamlit"]["question"]["gender"]
+    gender_ = st.multiselect(
+        gender["question"] +
+        " ({}個まで)".format(str(gender["max_choice"])),
+        gender["choice"].keys())
+
+    st.write(", ".join(gender_))
+    is_gender = len(gender_) <= gender["max_choice"]
+
+    age = conf["streamlit"]["question"]["age"]
+
+    age_ = st.multiselect(
+        age["question"] +
+        " ({}個まで)".format(str(age["max_choice"])),
+        age["choice"].keys())
+    st.write(", ".join(age_))
+    is_age = len(age_) <= age["max_choice"]
+
+    feature = conf["streamlit"]["question"]["feature"]
+    feature_ = st.multiselect(
+        feature["question"] +
+        " ({}個まで)".format(str(feature["max_choice"])),
+        feature["choice"].keys(),
+        [])
+    st.write(", ".join(feature_))
+    is_feature = len(feature_) <= feature["max_choice"]
+
+    if is_age & is_gender & is_feature:
+        if st.button('登録'):
+            url = conf['fastapi']['url']['register']
+            request_ = json.dumps({
+                "address": st.session_state.address,
+                "registration": {
+                    "gender": {key: gender["choice"][key] for key in gender_},
+                    "age": {key: age["choice"][key] for key in age_},
+                    "feature":  {key: feature["choice"][key] for key in feature_}
+                }})
+            st.info(request_)
+            response = requests.post(url, request_)
+            st.info(response.text)
+    else:
+        st.error("記入に誤りがあります。")
 
 
 if __name__ == '__main__':

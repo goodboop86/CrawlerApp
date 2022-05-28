@@ -31,6 +31,12 @@ class Strategy(BaseModel):
         return v
 
 
+class Registraion(BaseModel):
+    gender: dict
+    age: dict
+    feature: dict
+
+
 class CrawlRequest(BaseModel):
     target: Union[list[HttpUrl], HttpUrl] = Field(...)
     strategy: Strategy
@@ -39,3 +45,12 @@ class CrawlRequest(BaseModel):
 class AuthRequest(BaseModel):
     address: EmailStr
     password: SecretStr = Field(min_length=8, max_length=64)
+
+
+class AccuontRequest(BaseModel):
+    address: EmailStr
+
+
+class RegisterRequest(BaseModel):
+    address: EmailStr
+    registration: Registraion
