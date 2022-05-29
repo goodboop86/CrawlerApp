@@ -41,10 +41,18 @@ def app():
             
             ### ショップの特徴
             {"・".join([k for k in res['feature']])}
+            
+            ---
             """
         )
     else:
         st.error(response.json())
+
+    with st.expander("パスワード変更"):
+        old_password = st.text_input("古いパスワード", type='password')
+        password = st.text_input("新しいパスワード", type='password')
+
+        submitted = st.button("更新")
 
 
 if __name__ == '__main__':

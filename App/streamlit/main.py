@@ -1,10 +1,15 @@
 import streamlit as st
-import json
-import requests
-import register
-import marketing
-import account
-import top
+from view import register
+from view import marketing
+from view import account
+from view import top
+from logic.auth_handler import AuthHandler
+
+
+def signout():
+    auth = AuthHandler()
+    auth.signout()
+
 
 signedin_pages = {"ショップ登録": register,
                   "分析": marketing,
@@ -24,6 +29,6 @@ with st.sidebar:
     page = pages[selection]
 
     if st.session_state.is_signedin:
-        st.button('ログアウト', on_click=top.signout)
+        st.button('ログアウト', on_click=signout)
 
 page.app()
