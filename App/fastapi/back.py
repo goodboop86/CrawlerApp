@@ -24,7 +24,7 @@ from datamodel.auth_model import User, Token, TokenData, UserInDB
 
 
 fake_users_db = {
-    "johndoe": {
+    "johndoe@example.com": {
         "username": "johndoe@example.com",
         "full_name": "John Doe",
         "email": "johndoe@example.com",
@@ -54,7 +54,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
     auth = Authenticator()
-    user = auth.get_user(fake_users_db, username=token_data.username)
+    user = auth.get_user(db=fake_users_db, username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -116,7 +116,7 @@ def signup(request: AuthRequest):
 
 @app.post("/oauth2_signup")
 def oauth2_signup(request: AuthRequest):
-    auth = Auth()
+    auth = Authenticator()
     response = auth.oauth2_signup(request.address, request.password)
     return response
 

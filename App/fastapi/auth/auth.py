@@ -12,6 +12,7 @@ DB_PATH = './db.json'
 class Auth:
     user_table = 'users'
     address_column = "address"
+    username_column = "username"
     password_column = "password"
 
     def __init__(self) -> None:

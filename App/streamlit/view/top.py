@@ -15,6 +15,11 @@ def app():
                            conf=_conf)
         auth.signin()
 
+    def oauth2_signup(_address, _password, _is_check, _conf):
+        auth = AuthHandler(address=_address, password=_password,
+                           conf=_conf, is_check=_is_check)
+        auth.oauth2_signup()
+
     def oauth2_signin(_address, _password, _conf):
         auth = AuthHandler(address=_address, password=_password,
                            conf=_conf)
@@ -42,6 +47,15 @@ def app():
         is_check = st.checkbox("規約に合意する")
 
         submitted = st.button("登録", on_click=signup,
+                              args=(address, password, is_check, conf))
+
+    with st.expander("ooauth2登録"):
+        st.write("こちらからご登録ください")
+        address = st.text_input("username_")
+        password = st.text_input("password_", type='password')
+        is_check = st.checkbox("規約に合意する_")
+
+        submitted = st.button("登録_", on_click=oauth2_signup,
                               args=(address, password, is_check, conf))
 
     with st.expander("oauth2ログイン"):
