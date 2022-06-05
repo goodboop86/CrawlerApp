@@ -25,7 +25,7 @@ from datamodel.auth_model import User, Token, TokenData, UserInDB
 
 fake_users_db = {
     "johndoe": {
-        "username": "johndoe",
+        "username": "johndoe@example.com",
         "full_name": "John Doe",
         "email": "johndoe@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
@@ -111,6 +111,13 @@ def crawl(request: CrawlRequest):
 def signup(request: AuthRequest):
     auth = Auth()
     response = auth.signup(request.address, request.password)
+    return response
+
+
+@app.post("/oauth2_signup")
+def oauth2_signup(request: AuthRequest):
+    auth = Auth()
+    response = auth.oauth2_signup(request.address, request.password)
     return response
 
 
