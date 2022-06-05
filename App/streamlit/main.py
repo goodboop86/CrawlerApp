@@ -22,6 +22,9 @@ if 'address' not in st.session_state:
 if 'is_signedin' not in st.session_state:
     st.session_state.is_signedin = False
 
+if 'access_token' not in st.session_state:
+    st.session_state.access_token = ""
+
 with st.sidebar:
     pages = signedin_pages if st.session_state.is_signedin else top_page
 

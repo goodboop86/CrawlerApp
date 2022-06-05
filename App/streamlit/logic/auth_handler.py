@@ -23,6 +23,17 @@ class AuthHandler(object):
         else:
             st.error(f"{response.text}")
 
+    def oauth2_signin(self):
+        url = self.conf['fastapi']['url']['oauth2_signin']
+        params = {"username": self.address,
+                  "password": self.password, "grant_type": "password"}
+        response = requests.post(url, params)
+        if response.ok:
+            st.info(f"{response.text}")
+            st.session_state.access_token = response.json()["access_token"]
+        else:
+            st.error(f"{response.text}")
+
     def signin(self):
         response = self._auth()
 

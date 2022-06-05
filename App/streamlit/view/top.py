@@ -15,6 +15,17 @@ def app():
                            conf=_conf)
         auth.signin()
 
+    def oauth2_signin(_address, _password, _conf):
+        auth = AuthHandler(address=_address, password=_password,
+                           conf=_conf)
+        auth.oauth2_signin()
+
+    def user_info():
+        headers = {'Authorization': 'Bearer {}'.format(
+            st.session_state.access_token)}
+        res = requests.get("http://127.0.0.1:8000/users/me", headers=headers)
+        st.info(res.content)
+
     with open("setting.json") as f:
         conf = json.load(f)
 
@@ -32,6 +43,16 @@ def app():
 
         submitted = st.button("登録", on_click=signup,
                               args=(address, password, is_check, conf))
+
+    with st.expander("oauth2ログイン"):
+        st.write("こちらからご登録ください")
+        address = st.text_input("username")
+        password = st.text_input("password", type='password')
+
+        submitted = st.button(
+            "oauth2ログイン", on_click=oauth2_signin, args=(address, password, conf))
+
+    userinfo = st.button("ユーザ情報", on_click=user_info)
 
     res = requests.get(conf["streamlit"]["url"]["term"])
     with st.expander("利用規約"):
