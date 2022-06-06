@@ -47,10 +47,6 @@ class AuthRequest(BaseModel):
     password: SecretStr = Field(min_length=8, max_length=64)
 
 
-class AccuontRequest(BaseModel):
-    address: EmailStr
-
-
 class RegisterRequest(BaseModel):
     address: EmailStr
     registration: Registraion

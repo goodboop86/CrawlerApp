@@ -9,7 +9,7 @@ def app():
 
     st.title('お客さま情報')
     url = conf['fastapi']['url']['account']
-    request = json.dumps({"address": st.session_state.address})
+    request = json.dumps({"address": "dummy"})
 
     response = requests.post(url, request)
     res = response.json()

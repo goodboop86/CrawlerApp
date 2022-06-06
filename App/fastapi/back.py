@@ -2,75 +2,27 @@
 
 
 import uvicorn
-from pydantic import BaseModel, Field, HttpUrl, validator, SecretStr, EmailStr
 from crawler.crawler_factory import CrawlerFactory
 from fastapi import FastAPI
 from datamodel.baseshop_model import Shop, Item
-from datamodel.request_model import CrawlRequest, AuthRequest, AccuontRequest, RegisterRequest
+from datamodel.request_model import CrawlRequest, AuthRequest
 from typing import Union
-from auth.auth import Auth
-from register.registrar import Registrar
-from passlib.context import CryptContext
-from datetime import datetime, timedelta
-from typing import Union
+from datetime import timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
-from pydantic import BaseModel
-from auth.authenticator import Authenticator
-from datamodel.auth_model import User, Token, TokenData, UserInDB
+from fastapi.security import OAuth2PasswordRequestForm
+from auth.authenticator import Authenticator, get_current_active_user
+from datamodel.auth_model import User, Token
 
-
-fake_users_db = {
-    "johndoe@example.com": {
-        "username": "johndoe@example.com",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "disabled": False,
-    }
-}
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, Authenticator.SECRET_KEY,
-                             algorithms=[Authenticator.ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    auth = Authenticator()
-    user = auth.get_user(db=fake_users_db, username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
-
-
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
 
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     auth = Authenticator()
     user = auth.authenticate_user(
-        fake_users_db, form_data.username, form_data.password)
+        username=form_data.username, password=form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -90,11 +42,6 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 
-@app.get("/users/me/items/")
-async def read_own_items(current_user: User = Depends(get_current_active_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]
-
-
 @app.get("/")
 def root():
     return {"message": "Hello World"}
@@ -107,38 +54,10 @@ def crawl(request: CrawlRequest):
     return result
 
 
-@app.post("/signup")
-def signup(request: AuthRequest):
-    auth = Auth()
-    response = auth.signup(request.address, request.password)
-    return response
-
-
 @app.post("/oauth2_signup")
 def oauth2_signup(request: AuthRequest):
     auth = Authenticator()
     response = auth.oauth2_signup(request.address, request.password)
-    return response
-
-
-@app.post("/signin",)
-def signin(request: AuthRequest):
-    auth = Auth()
-    response = auth.signin(request.address, request.password)
-    return response
-
-
-@app.post("/account",)
-def account(request: AccuontRequest):
-    auth = Auth()
-    response = auth.account(request.address)
-    return response
-
-
-@app.post("/register",)
-def register(request: RegisterRequest):
-    registrar = Registrar()
-    response = registrar.register(request)
     return response
 
 
