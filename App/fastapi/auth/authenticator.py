@@ -56,7 +56,8 @@ class Authenticator:
 
         db = DBAccessor()
         if db.get_email(address):
-            return {"status": "error", "message": "this mailaddress is already exists ;_;"}
+            raise HTTPException(
+                status_code=400, detail="this mailaddress is already exists ;_;")
         else:
             schema = {
                 db.USERNAME_COLUMN: address,
@@ -66,7 +67,7 @@ class Authenticator:
                 db.DISABLED_COLUMN: False,
             }
             db.insert(schema)
-            return {"status": "success", "message": "account created!"}
+            return {"status": "200", "detail": "account created!"}
 
     @classmethod
     def authenticate_user(cls, username: str, password: str):

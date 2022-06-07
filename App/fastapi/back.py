@@ -18,7 +18,14 @@ from datamodel.auth_model import User, Token
 app = FastAPI()
 
 
-@app.post("/token", response_model=Token)
+@app.post("/oauth2_signup")
+def oauth2_signup(request: AuthRequest):
+    auth = Authenticator()
+    response = auth.oauth2_signup(request.address, request.password)
+    return response
+
+
+@app.post("/oauth2_signin", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     auth = Authenticator()
     user = auth.authenticate_user(
@@ -52,13 +59,6 @@ def crawl(request: CrawlRequest):
     crawler = CrawlerFactory(request=request)
     result = crawler()
     return result
-
-
-@app.post("/oauth2_signup")
-def oauth2_signup(request: AuthRequest):
-    auth = Authenticator()
-    response = auth.oauth2_signup(request.address, request.password)
-    return response
 
 
 if __name__ == "__main__":

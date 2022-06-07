@@ -1,24 +1,20 @@
 import streamlit as st
-from view import register
-from view import marketing
-from view import account
-from view import top
+from view import register, marketing, account, top
 from logic.auth_handler import AuthHandler
 import requests
+import json
 
 
 def signout():
     auth = AuthHandler()
     auth.signout()
 
-# デバッグ用(後で消す)
-
 
 def user_info():
-    headers = {'Authorization': 'Bearer {}'.format(
-        st.session_state.access_token)}
-    res = requests.get("http://127.0.0.1:8000/users/me", headers=headers)
-    st.info(res.content)
+    with open("setting.json") as f:
+        conf = json.load(f)
+    auth = AuthHandler(conf=conf)
+    auth.user_info()
 
 
 signedin_pages = {"ショップ登録": register,
