@@ -70,25 +70,41 @@ class Authenticator:
             return {"status": "200", "detail": "account created!"}
 
     @classmethod
-    def authenticate_user(cls, username: str, password: str):
+    def oauth2_signin(cls, address: EmailStr, password: SecretStr):
+        user = cls._authenticate_user(username=address, password=password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        access_token_expires = timedelta(
+            minutes=Authenticator.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = cls._create_access_token(
+            data={"sub": user.username}, expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
+
+    @classmethod
+    def _authenticate_user(cls, username: str, password: str):
         db = DBAccessor()
         user = db.get_user(username=username)
         if not user:
             return False
-        if not cls.verify_password(password, user.hashed_password):
+        if not cls._verify_password(password, user.hashed_password):
             return False
         return user
 
     @classmethod
-    def verify_password(cls, plain_password, hashed_password):
+    def _verify_password(cls, plain_password, hashed_password):
         return cls.pwd_context.verify(plain_password, hashed_password)
 
     @classmethod
-    def get_password_hash(cls, password):
+    def _get_password_hash(cls, password):
         return cls.pwd_context.hash(password)
 
     @classmethod
-    def create_access_token(cls, data: dict, expires_delta: Union[timedelta, None] = None):
+    def _create_access_token(cls, data: dict, expires_delta: Union[timedelta, None] = None):
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta

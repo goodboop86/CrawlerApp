@@ -1,6 +1,16 @@
 import streamlit as st
 import json
 import requests
+from logic.auth_handler import AuthHandler
+
+
+def register(params_, conf_):
+    url = conf_['fastapi']['url']['register']
+    st.info(params_)
+    #response = requests.post(url, params_)
+    # st.info(response.text)
+    auth = AuthHandler(conf=conf_)
+    auth.register(params=params_)
 
 
 def app():
@@ -68,19 +78,15 @@ def app():
     is_filled_feature = len(feature_result) <= feature["max_choice"]
 
     if is_filled_age & is_filled_gender & is_filled_feature:
-        # TODO accessTokenを利用してアクセスする様に更新
-        if st.button('登録'):
-            url = conf['fastapi']['url']['register']
-            request_ = json.dumps({
-                "address": "dummy",
-                "registration": {
-                    "gender": {key: gender["choice"][key] for key in gender_result},
-                    "age": {key: age["choice"][key] for key in age_result},
-                    "feature":  {key: feature["choice"][key] for key in feature_result}
-                }})
-            st.info(request_)
-            response = requests.post(url, request_)
-            st.info(response.text)
+        params = json.dumps({
+            "address": "dummy",
+            "gender": {key: gender["choice"][key] for key in gender_result},
+            "age": {key: age["choice"][key] for key in age_result},
+            "feature":  {key: feature["choice"][key] for key in feature_result}
+        })
+        # todo accessTokenを利用してアクセスする様に更新
+        st.button('登録', on_click=register, args=(params, conf))
+
     else:
         st.error("記入に誤りがあります。")
 

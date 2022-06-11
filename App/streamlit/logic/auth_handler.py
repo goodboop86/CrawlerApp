@@ -44,3 +44,10 @@ class AuthHandler(object):
         url = self.conf['fastapi']['url']['users_me']
         res = requests.get(url, headers=headers)
         st.info(res.content)
+
+    def register(self, params):
+        headers = {'Authorization': 'Bearer {}'.format(
+            st.session_state.access_token)}
+        url = self.conf['fastapi']['url']['register']
+        res = requests.post(url, params, headers=headers)
+        st.info(res.content)

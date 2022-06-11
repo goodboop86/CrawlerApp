@@ -20,3 +20,9 @@ class TokenData(BaseModel):
 
 class UserInDB(User):
     hashed_password: str
+
+
+class Registraion(BaseModel):
+    gender: dict
+    age: dict
+    feature: dict
