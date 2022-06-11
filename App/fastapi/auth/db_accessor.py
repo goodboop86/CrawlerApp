@@ -1,5 +1,5 @@
 from tinydb import TinyDB, Query, where
-from datamodel.auth_model import UserInDB
+from schema.auth_model import UserInDB
 
 
 class DBAccessor:

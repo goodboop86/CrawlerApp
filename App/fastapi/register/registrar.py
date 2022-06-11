@@ -4,7 +4,7 @@ import re
 import os
 import hashlib
 from pydantic import SecretStr, EmailStr
-from datamodel.request_model import RegisterRequest
+from schema.request_model import RegisterRequest
 
 DB_PATH = './db.json'
 

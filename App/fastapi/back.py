@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-
 import uvicorn
 from crawler.crawler_factory import CrawlerFactory
-from fastapi import FastAPI
-from datamodel.baseshop_model import Shop, Item
-from datamodel.request_model import CrawlRequest, AuthRequest
+from schema.baseshop_model import Shop, Item
+from schema.request_model import CrawlRequest, AuthRequest
 from typing import Union
 from datetime import timedelta
 
-from fastapi import Depends, FastAPI, HTTPException, status
+
+from schema.auth_model import User, Token, Registraion
+from auth.authenticator import Authenticator
+from auth.authenticator import get_current_active_user
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from auth.authenticator import Authenticator, get_current_active_user
-from datamodel.auth_model import User, Token, Registraion
 
-
+from fastapi import FastAPI
 app = FastAPI()
 
 
