@@ -10,12 +10,8 @@ def signout():
     auth.signout()
 
 
-def user_info():
-    with open("setting.json") as f:
-        conf = json.load(f)
-    auth = AuthHandler(conf=conf)
-    auth.user_info()
-
+with open("setting.json") as f:
+    conf = json.load(f)
 
 signedin_pages = {"ショップ登録": register,
                   "分析": marketing,
@@ -35,7 +31,8 @@ with st.sidebar:
     page = pages[selection]
 
     if st.session_state.is_signedin:
-        st.button('ログアウト', on_click=signout)
-        st.button("ユーザ情報", on_click=user_info)
+        st.button('ログアウト', on_click=AuthHandler.signout)
+        st.button("ユーザ情報", on_click=AuthHandler.user_info,
+                  args=([conf['fastapi']['url']['users_me']]))
 
 page.app()

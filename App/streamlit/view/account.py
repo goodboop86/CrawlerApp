@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import requests
+from logic.auth_handler import AuthHandler
 
 
 def app():
@@ -8,43 +9,16 @@ def app():
         conf = json.load(f)
 
     st.title('お客さま情報')
-    url = conf['fastapi']['url']['account']
-    request = json.dumps({"address": "dummy"})
+    response = AuthHandler.account_info(
+        url=conf['fastapi']['url']['account_info'])
 
-    response = requests.post(url, request)
     res = response.json()
 
     if response.ok:
-        st.markdown(
-            f"""
-            ---
-            ### メールアドレス
-            #### {res['address']}
+        for elem in res:
+            st.header(elem)
+            st.text(res[elem])
 
-            ---
-
-
-            ### パスワード
-            \********
-
-            ---
-
-            ### 対象のお客さま
-            {"・".join([k for k in res['gender']])}
-
-            ---
-            
-            ### 年齢
-            {"・".join([k for k in res['age']])}
-
-            ---
-            
-            ### ショップの特徴
-            {"・".join([k for k in res['feature']])}
-            
-            ---
-            """
-        )
     else:
         st.error(response.json())
 

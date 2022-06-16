@@ -13,6 +13,18 @@ def register(params_, conf_):
     auth.register(params=params_)
 
 
+def multiselect_form(elem):
+    elem_result = st.multiselect(
+        elem["question"] +
+        " ({}個まで)".format(str(elem["max_choice"])),
+        elem["choice"].keys())
+
+    st.write(", ".join(elem_result))
+    is_filled_elem = len(elem_result) <= elem["max_choice"]
+
+    return ({key: elem["choice"][key] for key in elem_result}, is_filled_elem)
+
+
 def app():
 
     with open("setting.json") as f:
@@ -51,41 +63,24 @@ def app():
     st.header("あなたのお店について教えてください")
 
     gender = conf["streamlit"]["question"]["gender"]
-    gender_result = st.multiselect(
-        gender["question"] +
-        " ({}個まで)".format(str(gender["max_choice"])),
-        gender["choice"].keys())
-
-    st.write(", ".join(gender_result))
-    is_filled_gender = len(gender_result) <= gender["max_choice"]
+    gender_result, is_filled_gender = multiselect_form(elem=gender)
 
     age = conf["streamlit"]["question"]["age"]
-
-    age_result = st.multiselect(
-        age["question"] +
-        " ({}個まで)".format(str(age["max_choice"])),
-        age["choice"].keys())
-    st.write(", ".join(age_result))
-    is_filled_age = len(age_result) <= age["max_choice"]
+    age_result, is_filled_age = multiselect_form(elem=age)
 
     feature = conf["streamlit"]["question"]["feature"]
-    feature_result = st.multiselect(
-        feature["question"] +
-        " ({}個まで)".format(str(feature["max_choice"])),
-        feature["choice"].keys(),
-        [])
-    st.write(", ".join(feature_result))
-    is_filled_feature = len(feature_result) <= feature["max_choice"]
+    feature_result, is_filled_feature = multiselect_form(elem=feature)
 
     if is_filled_age & is_filled_gender & is_filled_feature:
         params = json.dumps({
             "address": "dummy",
-            "gender": {key: gender["choice"][key] for key in gender_result},
-            "age": {key: age["choice"][key] for key in age_result},
-            "feature":  {key: feature["choice"][key] for key in feature_result}
+            "gender": gender_result,
+            "age": age_result,
+            "feature":  feature_result
         })
         # todo accessTokenを利用してアクセスする様に更新
-        st.button('登録', on_click=register, args=(params, conf))
+        st.button('登録', on_click=AuthHandler.register, args=(
+            params, conf["fastapi"]["url"]["register"]))
 
     else:
         st.error("記入に誤りがあります。")

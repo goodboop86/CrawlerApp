@@ -9,9 +9,9 @@ from datetime import timedelta
 
 
 from schema.auth_model import User, Token, Registraion
-from auth.authenticator import Authenticator
-from auth.authenticator import get_current_active_user
-from fastapi import Depends
+from auth.authenticator import Authenticator, oauth2_scheme, get_current_active_user, register_user_setting, get_current_content
+from auth.db_accessor import DBAccessor
+from fastapi import Depends, Header, Body
 from fastapi.security import OAuth2PasswordRequestForm
 
 from fastapi import FastAPI
@@ -19,10 +19,10 @@ app = FastAPI()
 
 
 @app.post("/oauth2_signup")
-def oauth2_signup(request: AuthRequest):
+async def oauth2_signup(request: AuthRequest):
     auth = Authenticator()
     response = auth.oauth2_signup(
-        address=request.address, password=request.password)
+        username=request.username, password=request.password)
     return response
 
 
@@ -30,7 +30,7 @@ def oauth2_signup(request: AuthRequest):
 async def oauth2_signin(request: OAuth2PasswordRequestForm = Depends()):
     auth = Authenticator()
     response = auth.oauth2_signin(
-        address=request.username, password=request.password)
+        username=request.username, password=request.password)
     return response
 
 
@@ -39,9 +39,14 @@ async def users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 
-@app.post("/register", response_model=User)
-async def register(current_user: Registraion = Depends(get_current_active_user)):
-    return current_user
+@app.get("/account_info")
+async def users_me(current_user: User = Depends(get_current_active_user), current_content: Registraion = Depends(get_current_content)):
+    return dict(current_user.dict(), **current_content.dict())
+
+
+@app.post("/register")
+async def register(response=Depends(register_user_setting)):
+    return response
 
 
 @app.get("/")

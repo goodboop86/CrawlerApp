@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 from typing import Union
 from pydantic import SecretStr, EmailStr
 from auth.db_accessor import DBAccessor
-from fastapi import Depends
+from fastapi import Depends, Request, Body
 from fastapi import HTTPException, status
-from schema.auth_model import User, TokenData
+from schema.auth_model import User, TokenData, Registraion
 from fastapi.security import OAuth2PasswordBearer
 
 
@@ -39,6 +39,32 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
+async def get_current_content(token: str = Depends(oauth2_scheme)):
+    """
+    headerに付与されたtokenからユーザに該当するコンテンツを取得して返す
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, Authenticator.SECRET_KEY,
+                             algorithms=[Authenticator.ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+
+    db = DBAccessor()
+    content = db.get_content(username=token_data.username)
+    if content is None:
+        raise credentials_exception
+    return content
+
+
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
     """
     headerに付与されたtokenからユーザを取得してactiveなら返す
@@ -46,6 +72,16 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+async def register_user_setting(current_user: User = Depends(get_current_active_user), content: Registraion = Body(default=None)):
+    db = DBAccessor()
+    try:
+        db.upsert_content(username=current_user.username, content=content)
+    except:
+        raise HTTPException(status_code=400, detail="DB upsert error")
+
+    return {"status": "200", "detail": "setting registered!"}
 
 
 class Authenticator:
@@ -58,18 +94,18 @@ class Authenticator:
         pass
 
     @classmethod
-    def oauth2_signup(cls, address: EmailStr, password: SecretStr):
+    def oauth2_signup(cls, username: EmailStr, password: SecretStr):
         password_: str = cls.pwd_context.encrypt(password.get_secret_value())
 
         db = DBAccessor()
-        if db.get_user(address):
+        if db.get_user(username):
             raise HTTPException(
                 status_code=400, detail="this mailaddress is already exists ;_;")
         else:
             schema = {
-                db.USERNAME_COLUMN: address,
-                db.FULLNAME_COLUMN: address,
-                db.EMAIL_COLUMN: address,
+                db.USERNAME_COLUMN: username,
+                db.FULLNAME_COLUMN: username,
+                db.EMAIL_COLUMN: username,
                 db.HASHED_PASSWORD_COLUMN: password_,
                 db.DISABLED_COLUMN: False,
             }
@@ -77,8 +113,8 @@ class Authenticator:
             return {"status": "200", "detail": "account created!"}
 
     @classmethod
-    def oauth2_signin(cls, address: EmailStr, password: SecretStr):
-        user = cls._authenticate_user(username=address, password=password)
+    def oauth2_signin(cls, username: EmailStr, password: SecretStr):
+        user = cls._authenticate_user(username=username, password=password)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

@@ -43,10 +43,10 @@ class CrawlRequest(BaseModel):
 
 
 class AuthRequest(BaseModel):
-    address: EmailStr
+    username: EmailStr
     password: SecretStr = Field(min_length=8, max_length=64)
 
 
 class RegisterRequest(BaseModel):
-    address: EmailStr
+    username: EmailStr
     registration: Registraion
