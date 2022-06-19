@@ -4,7 +4,7 @@ from crawler.crawler import Crawler
 import requests
 from pydantic import HttpUrl
 from typing import Callable
-from datamodel.request_model import CrawlRequest
+from schema.request_model import CrawlRequest
 
 
 class BaseShopCrawler(Crawler):

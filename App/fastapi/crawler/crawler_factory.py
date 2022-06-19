@@ -1,7 +1,7 @@
 from typing import Callable
 
 from pydantic import HttpUrl
-from datamodel.request_model import CrawlRequest
+from schema.request_model import CrawlRequest
 from factorymap.crawler_factorymap import CrawlDomainMap, CrawlTypeMap
 from typing import Union
 

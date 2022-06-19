@@ -1,6 +1,6 @@
 from enum import Enum
 from crawler.baseshop_crawler import BaseShopCrawler
-from datamodel.request_model import CrawlDomain, CrawlType
+from schema.request_model import CrawlDomain, CrawlType
 from crawler.crawler import Crawler
 
 
@@ -14,9 +14,9 @@ class CrawlDomainMap(Enum):
     baseshop = BaseShopCrawler
 
     @classmethod
-    def should_match_datamodel(cls):
+    def should_match_schema(cls):
         """
-        各要素は対応するrequest datamodelの要素と一致する必要がある
+        各要素は対応するrequest schemaの要素と一致する必要がある
         """
         if [*cls.__members__] is not CrawlDomain.schema()["properties"]["required"]["default"]:
             raise(f"{cls.__name__} should match schema!")
@@ -40,9 +40,9 @@ class CrawlTypeMap(Enum):
     itemurls_from_sitemap = "_itemurls_from_sitemap"
 
     @classmethod
-    def should_match_datamodel(cls):
+    def should_match_schema(cls):
         """
-        各要素は対応するrequest datamodelの要素と一致する必要がある
+        各要素は対応するrequest schemaの要素と一致する必要がある
         """
         if [*cls.__members__] is not CrawlType.schema()["properties"]["required"]["default"]:
             raise(f"[{cls.__name__}] should match schema!")
